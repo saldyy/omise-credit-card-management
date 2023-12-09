@@ -4,10 +4,11 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import Omise from "../../services/omise";
 import { COLOR } from "../../styles/themes";
 import TextInput from "../../components/TextInput";
-import Button from "../../components/Button";
+import LoadingButton from "../../components/LoadingButton";
 import { useAppDispatch } from "../../stores";
 import { addCreditCard } from "../../stores/reducer/CreditCards";
 import { useNavigation } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
 
 export const AddCard = () => {
   const navigation = useNavigation();
@@ -16,6 +17,7 @@ export const AddCard = () => {
   const [cardName, setCardName] = useState("Bruce Wayne");
   const [expiryDate, setExpiryDate] = useState("42/42");
   const [cvc, setCVC] = useState("424");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onChangeCardNumber = (number: string) => {
     setCardNumber(
@@ -33,6 +35,30 @@ export const AddCard = () => {
         .replace(/(\d{2})/g, "$1/")
         .replace(/\/$/, ""),
     );
+  };
+
+  const addCard = async () => {
+    try {
+      setIsSubmitting(true);
+      const result = await Omise.createToken({
+        card: {
+          name: cardName,
+          number: cardNumber.replace(/\s/g, ""),
+          expiration_month: expiryDate.split("/")[0],
+          expiration_year: `20${expiryDate.split("/")[1]}`,
+          security_code: cvc,
+        },
+      });
+      dispatch(addCreditCard({ data: result }));
+      navigation.navigate("ListCreditCards");
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -104,24 +130,9 @@ export const AddCard = () => {
         </View>
       </View>
       <View style={styles.submitButtonContainer}>
-        <Button
-          onPress={async () => {
-            try {
-              const result = await Omise.createToken({
-                card: {
-                  name: cardName,
-                  number: cardNumber.replace(/\s/g, ""),
-                  expiration_month: expiryDate.split("/")[0],
-                  expiration_year: `20${expiryDate.split("/")[1]}`,
-                  security_code: cvc,
-                },
-              });
-              dispatch(addCreditCard({ data: result }));
-              navigation.navigate("ListCreditCards");
-            } catch (error) {
-              console.log(error, "ero");
-            }
-          }}
+        <LoadingButton
+          isLoading={isSubmitting}
+          onPress={addCard}
           title="Submit"
           style={{ borderRadius: 50 }}
         />

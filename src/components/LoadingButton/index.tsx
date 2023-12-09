@@ -1,10 +1,11 @@
 import React from "react";
 import {
+  ActivityIndicator,
   GestureResponderEvent,
   StyleProp,
   StyleSheet,
-  StyleSheetProperties,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -13,21 +14,40 @@ import { COLOR } from "../../styles/themes";
 
 type CustomButtonProps = {
   onPress: (event: GestureResponderEvent) => void;
+  isLoading: boolean;
   title?: string;
   color?: string;
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  textColor?: string;
 };
 
-export default ({ onPress, title, color, style }: CustomButtonProps) => {
+export default ({
+  onPress,
+  isLoading,
+  title,
+  color,
+  style,
+  textStyle,
+  textColor = "#fff",
+}: CustomButtonProps) => {
   return (
     <TouchableOpacity
+      activeOpacity={1}
       onPress={onPress}
+      disabled={isLoading}
       style={[
         styles.appButtonContainer,
         { backgroundColor: color || COLOR.PRIMARY },
         style,
       ]}>
-      <Text style={styles.appButtonText}>{title}</Text>
+      {isLoading ? (
+        <ActivityIndicator color={textColor} />
+      ) : (
+        <Text style={[styles.appButtonText, textStyle, { color: textColor }]}>
+          {title}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
