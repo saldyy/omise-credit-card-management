@@ -3,8 +3,9 @@ import { StyleSheet } from "react-native";
 import { Provider } from "react-redux";
 import Config from "react-native-config";
 import Omise from "./services/omise";
+import Toast from "react-native-toast-message";
 
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ListCreditCards from "./screens/ListCreditCards";
 import AddCard from "./screens/AddCard";
@@ -14,7 +15,10 @@ const Stack = createNativeStackNavigator();
 
 function App(): React.JSX.Element {
   useEffect(() => {
-    Omise.config(Config.OMISE_PUBLIC_KEY as string);
+    Omise.config(
+      Config.OMISE_PRIVATE_KEY as string,
+      Config.OMISE_PUBLIC_KEY as string,
+    );
   }, []);
   console.log(Config);
   return (
@@ -41,6 +45,7 @@ function App(): React.JSX.Element {
           />
         </Stack.Navigator>
       </NavigationContainer>
+      <Toast />
     </Provider>
   );
 }

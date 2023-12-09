@@ -1,17 +1,23 @@
 import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import Icon from "../Icon";
 
 type CreditCardItemProps = {
-  cardNumber: string;
-  expiration: string;
-  cardName: string;
+  cardData: {
+    last4Digit: string;
+    expiration: string;
+    cardName: string;
+  };
+  onPress: () => void;
 };
 
-export const CreditCardItem = (props: CreditCardItemProps) => {
-  const { cardName, cardNumber, expiration } = props;
+export const CreditCardItem = ({
+  cardData = { cardName: "", last4Digit: "", expiration: "" },
+  onPress = () => {},
+}: CreditCardItemProps) => {
+  const { cardName, last4Digit: cardNumber, expiration } = cardData;
   return (
-    <View style={[styles.card, styles.elevation]}>
+    <Pressable onPress={onPress} style={[styles.card, styles.elevation]}>
       <View style={[styles.cardItem, styles.marginBottom10]}>
         <Image source={require("../../assets/visa_h16_color.png")} />
       </View>
@@ -30,7 +36,7 @@ export const CreditCardItem = (props: CreditCardItemProps) => {
         <Text style={styles.textBold}>{expiration}</Text>
       </View>
       <Icon name="plus" size={15} color="black" />
-    </View>
+    </Pressable>
   );
 };
 

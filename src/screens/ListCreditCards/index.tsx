@@ -1,20 +1,18 @@
 import React, { useEffect } from "react";
-import { FlatList, StyleSheet, View, Pressable } from "react-native";
+import { FlatList, View, Pressable, StyleSheet } from "react-native";
 import CreditCardItem from "../../components/CreditCardItem";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "../../components/Icon";
 import { COLOR } from "../../styles/themes";
 import { useAppSelector } from "../../stores";
 import { selectCreditCards } from "../../stores/reducer/CreditCards";
 import EmptyListCreditCard from "./components/EmptyListCreditCard";
+import Omise from "../../services/omise";
+import Toast from "react-native-toast-message";
 
-const ListCreditCards = () => {
+export const ListCreditCards = () => {
   const navigation = useNavigation();
   const creditCards = useAppSelector(selectCreditCards);
-  useEffect(() => {
-    console.log(creditCards, "in here");
-  }, [creditCards]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -31,16 +29,33 @@ const ListCreditCards = () => {
     });
   }, []);
 
-  // if (isLoading) {
-  //   return <ActivityIndicator />;
-  // }
+  const chargeAmountFromCard = async (cardId: string) => {
+    try {
+      const amount = Math.round(Math.random() * 10000);
+      const result = await Omise.charge({
+        amount,
+        currency: "thb",
+        card: cardId,
+      });
+      console.log(result, "res");
+      Toast.show({
+        type: "success",
+        text1: `Successfully charge ${amount} thb from your card.`,
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: `Something went wrong`,
+      });
+    }
+  };
 
   if (creditCards.length === 0) {
     return <EmptyListCreditCard />;
   }
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#fff" }}>
+    <View style={{ backgroundColor: "#fff" }}>
       <FlatList
         data={creditCards}
         showsVerticalScrollIndicator={false}
@@ -48,15 +63,23 @@ const ListCreditCards = () => {
         renderItem={({ item }) => {
           return (
             <CreditCardItem
-              cardName={item?.name || ""}
-              cardNumber="000"
-              expiration="02/26"
+              onPress={async () => {
+                chargeAmountFromCard(item.id);
+              }}
+              cardData={{
+                cardName: item?.card?.name || "",
+                last4Digit: item?.card?.last_digits || "",
+                expiration:
+                  item?.card?.expiration_month && item?.card?.expiration_year
+                    ? `${item?.card?.expiration_month}/${item?.card?.expiration_year}`
+                    : "",
+              }}
             />
           );
         }}
         keyExtractor={item => item.id}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

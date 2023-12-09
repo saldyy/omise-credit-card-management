@@ -8,12 +8,13 @@ const apiEndpoint = "https://api.omise.co/";
  */
 class ReactNativeOmise {
   private _publicKey: string = "";
+  private _privateKey: string = "";
   private _apiVersion: string = "2015-11-17";
   /**
    * constructor
    */
   constructor() {
-    this.createSource = this.createSource.bind(this);
+    this.charge = this.charge.bind(this);
     this.createToken = this.createToken.bind(this);
     this.getCapabilities = this.getCapabilities.bind(this);
   }
@@ -23,18 +24,21 @@ class ReactNativeOmise {
    * @param {String} publicKey
    * @param {String} apiVersion
    */
-  config(publicKey: string) {
-    console.log("CONFFIG", publicKey);
+  config(privateKey: string, publicKey: string) {
     this._publicKey = publicKey;
+    this._privateKey = privateKey;
   }
 
   /**
    * Get headers
    * @return {*} headers
    */
-  getHeaders() {
+  getHeaders(options = { usePrivateKey: false }) {
+    const { usePrivateKey } = options;
     let headers: Record<string, string> = {
-      Authorization: "Basic " + base64.encode(this._publicKey + ":"),
+      Authorization:
+        "Basic " +
+        base64.encode(usePrivateKey ? this._privateKey : this._publicKey + ":"),
       "User-Agent": pkgConfig.name + "/" + pkgConfig.version,
       "Content-Type": "application/json",
     };
@@ -91,10 +95,10 @@ class ReactNativeOmise {
    * @return {*}
    */
   // @ts-ignore
-  createSource(data) {
-    const sourceEndpoint = apiEndpoint + "sources";
+  charge(data) {
+    const sourceEndpoint = apiEndpoint + "charges";
     // set headers
-    let headers = this.getHeaders();
+    let headers = this.getHeaders({ usePrivateKey: true });
 
     return new Promise((resolve, reject) => {
       // verify a public key
