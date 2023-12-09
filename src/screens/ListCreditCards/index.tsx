@@ -1,23 +1,48 @@
-import React from "react";
-import { ActivityIndicator, FlatList, StyleSheet } from "react-native";
-import { useGetListCreditCardsQuery } from "../../stores/apis/CreditCards";
+import React, { useEffect } from "react";
+import { FlatList, StyleSheet, View, Pressable } from "react-native";
 import CreditCardItem from "../../components/CreditCardItem";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import Icon from "../../components/Icon";
+import { COLOR } from "../../styles/themes";
+import { useAppSelector } from "../../stores";
+import { selectCreditCards } from "../../stores/reducer/CreditCards";
+import EmptyListCreditCard from "./components/EmptyListCreditCard";
 
 const ListCreditCards = () => {
-  const { data, isLoading, isFetching } = useGetListCreditCardsQuery({
-    limit: 10,
-    offset: 0,
-  });
+  const navigation = useNavigation();
+  const creditCards = useAppSelector(selectCreditCards);
+  useEffect(() => {
+    console.log(creditCards, "in here");
+  }, [creditCards]);
 
-  if (isLoading) {
-    return <ActivityIndicator />;
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View>
+          <Pressable
+            onPress={() => {
+              navigation.navigate("AddCard");
+            }}>
+            <Icon size={20} color={COLOR.PRIMARY} name={"plus"} />
+          </Pressable>
+        </View>
+      ),
+    });
+  }, []);
+
+  // if (isLoading) {
+  //   return <ActivityIndicator />;
+  // }
+
+  if (creditCards.length === 0) {
+    return <EmptyListCreditCard />;
   }
 
   return (
     <SafeAreaView style={{ backgroundColor: "#fff" }}>
       <FlatList
-        data={data?.results}
+        data={creditCards}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.flatListContainer}
         renderItem={({ item }) => {
@@ -29,7 +54,7 @@ const ListCreditCards = () => {
             />
           );
         }}
-        keyExtractor={item => item.name}
+        keyExtractor={item => item.id}
       />
     </SafeAreaView>
   );

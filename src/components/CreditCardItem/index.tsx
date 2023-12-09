@@ -1,5 +1,6 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
+import Icon from "../Icon";
 
 type CreditCardItemProps = {
   cardNumber: string;
@@ -28,6 +29,7 @@ export const CreditCardItem = (props: CreditCardItemProps) => {
         <Text style={styles.textBold}>{cardName}</Text>
         <Text style={styles.textBold}>{expiration}</Text>
       </View>
+      <Icon name="plus" size={15} color="black" />
     </View>
   );
 };

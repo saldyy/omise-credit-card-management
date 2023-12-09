@@ -1,9 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { creditCardsApi } from "./apis/CreditCards";
+import creditCardsReducer from "./reducer/CreditCards";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
   reducer: {
     [creditCardsApi.reducerPath]: creditCardsApi.reducer,
+    creditCards: creditCardsReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware().concat(creditCardsApi.middleware),
@@ -13,3 +16,6 @@ export const store = configureStore({
 export type RootState = ReturnType<typeof store.getState>;
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
